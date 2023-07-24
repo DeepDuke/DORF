@@ -1,0 +1,5 @@
+*.bag
+*.pcd
+*.log
+*.pyc
+**/.vscode/**
