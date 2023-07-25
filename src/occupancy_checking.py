@@ -8,14 +8,8 @@ from functools import partial
 import multiprocessing as mp
 
 from sensor_msgs import point_cloud2
-
-import config as cfg 
-from config import remo_params
-from my_logger import MyLogger
 from range_image_utils import transform_from_lidar_frame_to_map_frame
 
-
-logger = MyLogger(cfg.log_path,  datetime.now().strftime("%m-%d-%Y_%H-%M-%S") + '_' + cfg.occupancy_log_filename, level=cfg.log_level)
 
 class Grid:
     def __init__(self):
@@ -33,15 +27,13 @@ class OccupancyGridMap2D:
         self._init_2D_grid_map(pcd_3d_points)
         
     def _init_2D_grid_map(self, pcd_3d_points):
-        global logger
-        
         # Map Boundary
         self.x_min = np.amin(pcd_3d_points[:, 0])
         self.x_max = np.amax(pcd_3d_points[:, 0])
         self.y_min = np.amin(pcd_3d_points[:, 1])
         self.y_max = np.amax(pcd_3d_points[:, 1])
         
-        logger.INFO('Boundary ({}, {}, {}, {})'.format(self.x_min, self.y_min, self.x_max, self.y_max))
+        print('Boundary ({}, {}, {}, {})'.format(self.x_min, self.y_min, self.x_max, self.y_max))
         
         # Grid Generation
         self.X_GRID_NUM = int(math.ceil((self.x_max - self.x_min) / self.resolution * 1.0))
@@ -74,8 +66,8 @@ class OccupancyGridMap2D:
         
         u = min(u, self.X_GRID_NUM-1)
         v = min(v, self.Y_GRID_NUM-1)
-        print('point --> {}, (u, v) --> ({}, {}), X_GRID_NUM --> {}, Y_GRID_NUM --> {}'.format(
-            point, u, v, self.X_GRID_NUM, self.Y_GRID_NUM))
+        # print('point --> {}, (u, v) --> ({}, {}), X_GRID_NUM --> {}, Y_GRID_NUM --> {}'.format(
+        #     point, u, v, self.X_GRID_NUM, self.Y_GRID_NUM))
         
         return u, v
     
@@ -105,36 +97,6 @@ class OccupancyGridMap2D:
             single_scan_middle_grid_coords.extend(middle_grid_coords)
             
         return single_scan_middle_grid_coords
-    
-def occupancy_checking(pcd_3d_points, node_msg_list):
-    """If prob is higher than a threshold, then this grid should be pure static. 
-    """
-    occupancy_grid_map = OccupancyGridMap2D(pcd_3d_points, remo_params['ray_tracing_resolution'])
-    ray_tracing_result = []
-    for id, node_msg in enumerate(node_msg_list):
-        _, msg, _ = node_msg
-        cur_odom = msg.odom
-        pc2_msg = msg.lidar
-        scan_points = point_cloud2.read_points(pc2_msg)  # (x, y, z)
-        single_scan_middle_grid_coords = occupancy_grid_map.get_ray_tracing_result(cur_odom, scan_points)
-        ray_tracing_result.extend(single_scan_middle_grid_coords)
-        logger.INFO('Finish ray-tracing for {}-th frame scan'.format(id))
-
-    # Calculate The Occupancy Probability
-    for u, v in ray_tracing_result:
-        grid = occupancy_grid_map.get_grid(u, v)
-        grid.pass_cnt += 1
-    
-    pure_static_raw_ids = []
-    for u in range(occupancy_grid_map.X_GRID_NUM):
-        for v in range(occupancy_grid_map.Y_GRID_NUM):
-            grid = occupancy_grid_map.get_grid(u, v)
-            grid.occ_cnt = len(grid.point_ids)
-            grid.prob = grid.occ_cnt / (grid.occ_cnt + grid.pass_cnt + 1e-6)
-            if grid.prob > remo_params['pure_static_threshold']:
-                pure_static_raw_ids.extend(grid.point_ids)
-    
-    return pure_static_raw_ids
 
 def single_scan_ray_tracing(node_msg, occupancy_grid_map):
     ray_tracing_result = []
@@ -148,8 +110,8 @@ def single_scan_ray_tracing(node_msg, occupancy_grid_map):
     
     return ray_tracing_result 
 
-def occupancy_checking_mp(pcd_3d_points, node_msg_list, args):
-    occupancy_grid_map = OccupancyGridMap2D(pcd_3d_points, remo_params['ray_tracing_resolution'], args)
+def occupancy_checking_mp(pcd_3d_points, node_msg_list, args, config):
+    occupancy_grid_map = OccupancyGridMap2D(pcd_3d_points, config.ray_tracing_resolution, args)
     result = mp.Pool(args.n_proc).map(partial(single_scan_ray_tracing, occupancy_grid_map=occupancy_grid_map), node_msg_list)
     
     ray_tracing_result = []
@@ -162,19 +124,14 @@ def occupancy_checking_mp(pcd_3d_points, node_msg_list, args):
         grid.pass_cnt += 1
     
     pure_static_raw_ids = []
-    if args.dataset == 'kitti':
-        PURE_STATIC_THRESHOLD = remo_params['pure_static_threshold']
-    elif args.dataset == 'gazebo':
-        PURE_STATIC_THRESHOLD = remo_params['gazebo_pure_static_threshold']
-    elif args.dataset == 'ust':
-        PURE_STATIC_THRESHOLD = remo_params['ust_pure_static_threshold']
+    PURE_STATIC_THRESHOLD = config.pure_static_threshold
         
     for u in range(occupancy_grid_map.X_GRID_NUM):
         for v in range(occupancy_grid_map.Y_GRID_NUM):
             grid = occupancy_grid_map.get_grid(u, v)
             grid.occ_cnt = len(grid.point_ids)
             grid.prob = grid.occ_cnt / (grid.occ_cnt + grid.pass_cnt + 1e-6)
-            logger.INFO('Grid ({}, {}), occ_cnt = {},  pass_cnt = {}'.format(u, v, grid.occ_cnt, grid.pass_cnt))
+            print('Grid ({}, {}), occ_cnt = {},  pass_cnt = {}'.format(u, v, grid.occ_cnt, grid.pass_cnt))
             if grid.prob > PURE_STATIC_THRESHOLD:
                 pure_static_raw_ids.extend(grid.point_ids)
     

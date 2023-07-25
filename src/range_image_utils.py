@@ -1,6 +1,6 @@
 #! /usr/bin/python2.7
 
-from color_utils import MOVING_OBJECT_LABELS, COLOR_ZOO, get_random_color, get_label_color, get_moving_object_color, get_static_object_color
+from color_utils import MOVING_OBJECT_LABELS, COLOR_ZOO
 
 from config import remo_params
 
@@ -127,7 +127,7 @@ def gen_visible_range_image(range_image):
 
     return vis_img
     
-def gen_visible_residual_range_image(scan_ri, local_map_ri, local_map_index_ri, residual_range_image):
+def gen_visible_residual_range_image(scan_ri, local_map_ri, local_map_index_ri, residual_range_image, config):
         """Generate visible residual range image with colors
 
         Args:
@@ -180,7 +180,7 @@ def gen_visible_residual_range_image(scan_ri, local_map_ri, local_map_index_ri, 
 
         return res_vis_img, dyn_pt_indices
     
-def gen_local_map_range_image(msg_idx, odom_pose, pcd_raw_points, pcd_kdtree, args):
+def gen_local_map_range_image(msg_idx, odom_pose, pcd_raw_points, pcd_kdtree, args, config):
     """Generate range image local map 
 
     Args:
@@ -200,12 +200,7 @@ def gen_local_map_range_image(msg_idx, odom_pose, pcd_raw_points, pcd_kdtree, ar
     lidar_pos_in_map[0][1] = odom_pose.position.y
     # lidar_pos_in_map[0][2] = odom_pose.position.z
 
-    if args.dataset == 'kitti':
-        LOCAL_MAP_RADIUS = remo_params['LOCAL_MAP_RADIUS']
-    elif args.dataset == 'gazebo':
-        LOCAL_MAP_RADIUS = remo_params['gazebo_local_map_radius']
-    elif args.dataset == 'ust':
-        LOCAL_MAP_RADIUS = remo_params['ust_local_map_radius']
+    LOCAL_MAP_RADIUS = config.local_map_radius 
         
     indices = pcd_kdtree.query_radius(lidar_pos_in_map, r=LOCAL_MAP_RADIUS)
     local_map_pts_raw_ids = indices[0]
@@ -213,28 +208,16 @@ def gen_local_map_range_image(msg_idx, odom_pose, pcd_raw_points, pcd_kdtree, ar
         pcd_raw_points[raw_id][0], pcd_raw_points[raw_id][1],
         pcd_raw_points[raw_id][2]
     ] for raw_id in local_map_pts_raw_ids])
-    # np.savetxt('{}_local_map_points.csv'.format(msg_idx), local_map_points, fmt='%.2f', delimiter=',')
     
     # Transform pcd map points to lidar frame
     if args.dataset == 'kitti':
         transformed_local_map_points = transform_local_map_to_lidar_frame(odom_pose, local_map_points)
-    elif args.dataset == 'gazebo' or args.dataset == 'ust':
+    elif args.dataset == 'gazebo':
         transformed_local_map_points = transform_local_map_to_lidar_frame_gazebo(odom_pose, local_map_points)
         
-    # np.savetxt('{}_trans_local_map_points.csv'.format(msg_idx), transformed_local_map_points, fmt='%.2f', delimiter=',')
-    # self._logger.DEBUG('z_min --> {} | z_max --> {}'.format(np.amin(transformed_local_map_points[:, 2]), np.amax(transformed_local_map_points[:, 2])))
-
     # Filter transformed local map points by height
-    
-    if args.dataset == 'kitti':
-        LOCAL_MAP_MIN_HEIGHT = remo_params['LOCAL_MAP_MIN_HEIGHT']
-        LOCAL_MAP_MAX_HEIGHT = remo_params['LOCAL_MAP_MAX_HEIGHT']
-    elif args.dataset == 'gazebo':
-        LOCAL_MAP_MIN_HEIGHT = remo_params['gazebo_local_map_min_height'] 
-        LOCAL_MAP_MAX_HEIGHT = remo_params['gazebo_local_map_max_height'] 
-    elif args.dataset == 'ust':
-        LOCAL_MAP_MIN_HEIGHT = remo_params['ust_local_map_min_height']
-        LOCAL_MAP_MAX_HEIGHT = remo_params['ust_local_map_max_height']
+    LOCAL_MAP_MIN_HEIGHT = config.local_map_min_height
+    LOCAL_MAP_MAX_HEIGHT = config.local_map_max_height
     
     filtered_transformed_local_map_pts = []
     filtered_local_map_pts_raw_ids = []
@@ -344,7 +327,7 @@ def transform_local_map_to_lidar_frame_gazebo(lidar_pose, local_map_points):
 
     return transformed_homo_points[:, :3]
 
-def gen_scan_range_image(points, args):
+def gen_scan_range_image(points, args, config):
     """Convert points from PointCloud2 into numpy range image
 
     Args:
@@ -353,9 +336,9 @@ def gen_scan_range_image(points, args):
     Returns:
         np.array: range_image
     """
-    return gen_range_image(points, args)
+    return gen_range_image(points, args, config)
     
-def gen_range_image(points, args):
+def gen_range_image(points, args, config):
     """Convert numpy array points into range image
     Semantic Kitti Dataset uses Velodyne HDL-64E LiDAR:
                 Horizontal          Vertical
@@ -368,13 +351,7 @@ def gen_range_image(points, args):
         range image(2D np.ndarray): range image
         index_ri(2D np.ndarray): (row, col) --> point id in points 
     """    
-    if args.dataset == 'kitti':
-        RANGE_IMAGE_SHAPE = remo_params['RANGE_IMAGE_SHAPE']
-    elif args.dataset == 'gazebo':
-        RANGE_IMAGE_SHAPE = remo_params['gazebo_range_image_shape']
-    elif args.dataset == 'ust':
-        RANGE_IMAGE_SHAPE = remo_params['ust_range_image_shape']
-        
+    RANGE_IMAGE_SHAPE = config.range_image_shape     
     range_image = np.full(RANGE_IMAGE_SHAPE, 0.0)
 
     max_phi = -100
@@ -387,7 +364,7 @@ def gen_range_image(points, args):
 
     # calc range image pixel coordinates (u, v) for each point (x, y, z)
     for idx, point in enumerate(points):
-        row_id, col_id, phi, theta, r = calc_range_image_coordinates(point, args)
+        row_id, col_id, phi, theta, r = calc_range_image_coordinates(point, args, config)
         # save closest point
         if np.isclose(range_image[row_id, col_id], 0.0):
             range_image[row_id, col_id] = r
@@ -409,7 +386,7 @@ def gen_range_image(points, args):
 
     return range_image, index_ri
     
-def calc_range_image_coordinates(point, args):
+def calc_range_image_coordinates(point, args, config):
     """Calculate range image (row_id, col_id) for given 3D point
 
     Args:
@@ -418,24 +395,11 @@ def calc_range_image_coordinates(point, args):
     Returns:
         tuple: (row_id, col_id, phi, theta, r)
     """
-    if args.dataset == 'kitti':
-        HORIZONTAL_FOV = remo_params['HORIZONTAL_FOV']
-        THETA_UP = remo_params['THETA_UP']
-        VERTICAL_FOV = remo_params['VERTICAL_FOV']
-        RANGE_IMAGE_WIDTH = remo_params['RANGE_IMAGE_WIDTH']
-        RANGE_IMAGE_HEIGHT = remo_params['RANGE_IMAGE_HEIGHT']
-    elif args.dataset == 'gazebo':
-        HORIZONTAL_FOV = remo_params['gazebo_horizontal_fov']
-        THETA_UP = remo_params['gazebo_theta_up']
-        VERTICAL_FOV = remo_params['gazebo_vertical_fov']
-        RANGE_IMAGE_WIDTH = remo_params['gazebo_range_image_width']
-        RANGE_IMAGE_HEIGHT = remo_params['gazebo_range_image_height']
-    elif args.dataset == 'ust':
-        HORIZONTAL_FOV = remo_params['ust_horizontal_fov']
-        THETA_UP = remo_params['ust_theta_up']
-        VERTICAL_FOV = remo_params['ust_vertical_fov']
-        RANGE_IMAGE_WIDTH = remo_params['ust_range_image_width']
-        RANGE_IMAGE_HEIGHT = remo_params['ust_range_image_height']
+    HORIZONTAL_FOV = config.horizontal_fov 
+    THETA_UP = config.theta_up
+    VERTICAL_FOV = config.vertical_fov
+    RANGE_IMAGE_WIDTH = config.range_image_width
+    RANGE_IMAGE_HEIGHT = config.range_image_height
 
     x, y, z = point[0], point[1], point[2]
     r = sqrt(x**2 + y**2 + z**2)
@@ -455,7 +419,7 @@ def calc_range_image_coordinates(point, args):
 
 ############################################################  Sliding Window Functions ############################################################
 
-def sliding_window_get_single_scan_ri(msg_idx, cur_node, query_id, query_node, args):
+def sliding_window_get_single_scan_ri(msg_idx, cur_node, query_id, query_node, args, config):
     """Get single scan related range images
     Args:
         msg_idx (int): node msg index
@@ -474,21 +438,12 @@ def sliding_window_get_single_scan_ri(msg_idx, cur_node, query_id, query_node, a
 
     print('{}-frame, query-di --> {}, Generate scan range image ...'.format(msg_idx, query_id))
     
-    scan_ri, scan_index_ri = gen_scan_range_image(transfomed_points, args)
-    # np.savetxt('./{}_{}_scan_ri.csv'.format(msg_idx, query_id), scan_ri, fmt='%.2f', delimiter=',')
-
-    # # Generate visible coloful range image
-    # vis_scan_ri = gen_visible_range_image(scan_ri)
-    # plt.imsave('./{}_{}_scan_ri.jpg'.format(msg_idx, query_id), vis_scan_ri)
-
-    # # Mark dynamic points on vis_scan_ri, here we need to get intensity from points
-    # marked_vis_scan_ri = mark_on_vis_scan_range_ri(points, vis_scan_ri, scan_index_ri)
-    # plt.imsave('./{}_{}_marked_vis_scan_ri.jpg'.format(msg_idx, query_id), marked_vis_scan_ri)
+    scan_ri, scan_index_ri = gen_scan_range_image(transfomed_points, args, config)
     
     return scan_ri
 
 
-def sliding_window_get_residual_ri(msg_idx, query_id, scan_ri, local_map_ri, local_map_index_ri):
+def sliding_window_get_residual_ri(msg_idx, query_id, scan_ri, local_map_ri, local_map_index_ri, config):
     """Generate residual range image using scan range image and local_map range image 
     Args:
         msg_idx (int): idx for node msg
@@ -500,8 +455,7 @@ def sliding_window_get_residual_ri(msg_idx, query_id, scan_ri, local_map_ri, loc
     """
     print('{}-frame, query_id --> {}, Generate residual range image ...'.format(msg_idx, query_id))
     residual_ri = scan_ri - local_map_ri
-    vis_residual_ri, dyn_point_ids = gen_visible_residual_range_image(scan_ri, local_map_ri, local_map_index_ri, residual_ri)
-    # plt.imsave('./{}_{}_vis_residual_ri.jpg'.format(msg_idx, query_id), vis_residual_ri)
+    vis_residual_ri, dyn_point_ids = gen_visible_residual_range_image(scan_ri, local_map_ri, local_map_index_ri, residual_ri, config)
     print('dyn_point_ids length --> {}'.format(len(dyn_point_ids)))
     
     return dyn_point_ids
@@ -510,9 +464,11 @@ def transform_from_one_lidar_frame_to_another_lidar_frame(query_odom_pose, cur_o
     if args.dataset == 'kitti':
         T_query_lidar2map = get_lidar_to_map_transformation_matrix(query_odom_pose)
         T_cur_lidar2map = get_lidar_to_map_transformation_matrix(cur_odom_pose)
-    elif args.dataset == 'gazebo' or args.dataset == 'ust':
+    elif args.dataset == 'gazebo':
         T_query_lidar2map = get_lidar_to_map_transformation_matrix_gazebo(query_odom_pose)
         T_cur_lidar2map = get_lidar_to_map_transformation_matrix_gazebo(cur_odom_pose)
+    else:
+        raise NotImplementedError('Dataset {} not supported yet'.format(args.dataset))
     
     T_map2cur_lidar = inverse_matrix(T_cur_lidar2map)
     
@@ -526,7 +482,7 @@ def transform_from_one_lidar_frame_to_another_lidar_frame(query_odom_pose, cur_o
 def transform_from_lidar_frame_to_map_frame(odom_pose, scan_points, args):
     if args.dataset == 'kitti':
         T_lidar2map = get_lidar_to_map_transformation_matrix(odom_pose)
-    elif args.dataset == 'gazebo' or args.dataset == 'ust':
+    elif args.dataset == 'gazebo':
         T_lidar2map = get_lidar_to_map_transformation_matrix_gazebo(odom_pose)
         
     homogeneous_points = np.array([[pt[0], pt[1], pt[2], 1] for pt in scan_points])
@@ -595,7 +551,7 @@ def get_lidar_to_map_transformation_matrix_gazebo(odom_pose):
 ############################################################  Sliding Window Incremental Functions ############################################################
 
 def sliding_window_incremental_get_local_map_ri(pcd_raw_points, msg_idx, query_id, 
-                                                filtered_local_map_pts_raw_ids, filtered_local_map_pts, batch_dyn_point_ids, args):
+                                                filtered_local_map_pts_raw_ids, filtered_local_map_pts, batch_dyn_point_ids, args, config):
     """raw whole map points in *.pcd file
 
     Args:
@@ -612,20 +568,11 @@ def sliding_window_incremental_get_local_map_ri(pcd_raw_points, msg_idx, query_i
     """
     print('{}-th frame, query_id --> {}, Generate local map range image ...'.format(msg_idx, query_id))
     
-    local_map_ri, local_map_index_ri = sliding_window_incremental_gen_local_map_range_image(filtered_local_map_pts, batch_dyn_point_ids, args)
-    # np.savetxt('{}_local_map_ri.csv'.format(msg_idx), local_map_ri, fmt='%.2f', delimiter=',')
-
-    # # Generate visible coloful range image
-    # vis_local_map_ri = gen_visible_range_image(local_map_ri)
-    # plt.imsave('./{}_{}_local_map_ri.jpg'.format(msg_idx, query_id), vis_local_map_ri)
-
-    # # Mark dynamic points on vis_local_map_ri
-    # marked_vis_local_map_ri = mark_on_vis_local_map_ri(filtered_local_map_pts_raw_ids, pcd_raw_points, vis_local_map_ri, local_map_index_ri)
-    # plt.imsave('./{}_{}_marked_vis_local_map_ri.jpg'.format(msg_idx, query_id), marked_vis_local_map_ri)
+    local_map_ri, local_map_index_ri = sliding_window_incremental_gen_local_map_range_image(filtered_local_map_pts, batch_dyn_point_ids, args, config)
     
     return local_map_ri, local_map_index_ri
 
-def sliding_window_incremental_gen_local_map_range_image(filtered_local_map_pts, batch_dyn_point_ids, args):
+def sliding_window_incremental_gen_local_map_range_image(filtered_local_map_pts, batch_dyn_point_ids, args, config):
     """Generate range image local map 
 
     Args:
@@ -645,19 +592,14 @@ def sliding_window_incremental_gen_local_map_range_image(filtered_local_map_pts,
     updated_local_map_pts = [filtered_local_map_pts[id] for id in updated_local_map_pt_ids]
     
     # Generate range image    
-    if args.dataset == 'kitti':
-        RANGE_IMAGE_SHAPE = remo_params['RANGE_IMAGE_SHAPE'] 
-    elif args.dataset == 'gazebo':
-        RANGE_IMAGE_SHAPE = remo_params['gazebo_range_image_shape'] 
-    elif args.dataset == 'ust':
-        RANGE_IMAGE_SHAPE = remo_params['ust_range_image_shape']
+    RANGE_IMAGE_SHAPE = config.range_image_shape 
 
     local_map_ri = np.full(RANGE_IMAGE_SHAPE, 0.0)
     local_map_index_ri = np.full(RANGE_IMAGE_SHAPE, -1)  # point index in points that finally contributes to range image
 
     # calc range image pixel coordinates (u, v) for each point (x, y, z)
     for idx, point in zip(updated_local_map_pt_ids, updated_local_map_pts):
-        row_id, col_id, phi, theta, r = calc_range_image_coordinates(point, args)
+        row_id, col_id, phi, theta, r = calc_range_image_coordinates(point, args, config)
         # save closest point
         if np.isclose(local_map_ri[row_id, col_id], 0.0):
             local_map_ri[row_id, col_id] = r
@@ -669,26 +611,17 @@ def sliding_window_incremental_gen_local_map_range_image(filtered_local_map_pts,
 
     return local_map_ri, local_map_index_ri
 
-def sliding_window_incremental_get_local_map_info(msg_idx, odom_pose, pcd_raw_points, pcd_kdtree, args):
+def sliding_window_incremental_get_local_map_info(msg_idx, odom_pose, pcd_raw_points, pcd_kdtree, args, config):
     # Find local map points in a certain range
     lidar_pos_in_map = np.zeros((1, 2))
     lidar_pos_in_map[0][0] = odom_pose.position.x
     lidar_pos_in_map[0][1] = odom_pose.position.y
     # lidar_pos_in_map[0][2] = odom_pose.position.z
 
-    if args.dataset == 'kitti':
-        LOCAL_MAP_RADIUS = remo_params['LOCAL_MAP_RADIUS']
-        LOCAL_MAP_MIN_HEIGHT = remo_params['LOCAL_MAP_MIN_HEIGHT']
-        LOCAL_MAP_MAX_HEIGHT = remo_params['LOCAL_MAP_MAX_HEIGHT']
-    elif args.dataset == 'gazebo':
-        LOCAL_MAP_RADIUS = remo_params['gazebo_local_map_radius']
-        LOCAL_MAP_MIN_HEIGHT = remo_params['gazebo_local_map_min_height'] 
-        LOCAL_MAP_MAX_HEIGHT = remo_params['gazebo_local_map_max_height'] 
-    elif args.dataset == 'ust':
-        LOCAL_MAP_RADIUS = remo_params['ust_local_map_radius']
-        LOCAL_MAP_MIN_HEIGHT = remo_params['ust_local_map_min_height'] 
-        LOCAL_MAP_MAX_HEIGHT = remo_params['ust_local_map_max_height'] 
-        
+    LOCAL_MAP_RADIUS = config.local_map_radius
+    LOCAL_MAP_MIN_HEIGHT = config.local_map_min_height
+    LOCAL_MAP_MAX_HEIGHT = config.local_map_max_height
+
     indices = pcd_kdtree.query_radius(lidar_pos_in_map, r=LOCAL_MAP_RADIUS)
     local_map_pts_raw_ids = indices[0]
     local_map_points = np.array([[
@@ -700,7 +633,7 @@ def sliding_window_incremental_get_local_map_info(msg_idx, odom_pose, pcd_raw_po
     # Transform pcd map points to lidar frame
     if args.dataset == 'kitti':
         transformed_local_map_points = transform_local_map_to_lidar_frame(odom_pose, local_map_points)
-    elif args.dataset == 'gazebo' or args.dataset == 'ust':
+    elif args.dataset == 'gazebo':
         transformed_local_map_points = transform_local_map_to_lidar_frame_gazebo(odom_pose, local_map_points)
         
     # np.savetxt('{}_trans_local_map_points.csv'.format(msg_idx), transformed_local_map_points, fmt='%.2f', delimiter=',')

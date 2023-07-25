@@ -10,8 +10,8 @@ class Config:
         self.image_w_reso = math.radians(1.0)  # default 1.0 dgeree
         self.image_h_reso = math.radians(1.0)
         self.local_map_radius = 60.0           # meters
-        self.local_max_height = 5.0            # meters
-        self.local_min_height = -3.0           # meters
+        self.local_map_max_height = 5.0            # meters
+        self.local_map_min_height = -3.0           # meters
         self.dyn_threshold = 1.0               # meters
         # LiDAR FOV in radians
         self.horizontal_fov = math.radians(360.0)
@@ -37,9 +37,6 @@ class Config:
         self.log_path = './log/'
         self.log_level = 'DEBUG'  # (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         self.main_log_name = 'main.log'
-        self.coarse_log_name = 'coarse.log'
-        self.fine_log_name = 'fine.log'
-        self.occupany_log_name = 'occupancy.log'
         
         ## dataset path ##
         # rosbag 
@@ -67,6 +64,9 @@ class Config:
         self.theta_up = math.radians(self.theta_up)
         self.theta_down = math.radians(self.theta_down)
         self.vertical_fov = self.theta_up - self.theta_down
+        self.image_w_reso = math.radians(self.image_w_reso)
+        self.image_h_reso = math.radians(self.image_h_reso)
+        
         self.range_image_width = int(self.horizontal_fov / self.image_w_reso)
         self.range_image_height = int(self.vertical_fov / self.image_h_reso)
         self.range_image_shape = (self.range_image_height, self.range_image_width)

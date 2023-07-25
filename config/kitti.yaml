@@ -2,8 +2,8 @@
 image_w_reso: 1.0                   # Unit: degree
 image_h_reso: 1.0                   # Unit: degree
 local_map_radius: 60.0              # Unit: meters
-local_max_height: 5.0               # Unit: meters
-local_min_height: -3.0              # Unit: meters
+local_map_max_height: 5.0           # Unit: meters
+local_map_min_height: -3.0          # Unit: meters
 dyn_threshold: 1.0                  # Unit: meters
 # LiDAR FOV 
 horizontal_fov: 360.0               # Unit: degree 
@@ -29,9 +29,6 @@ pure_static_threshold: 0.0165
 log_path: ./log/
 log_level: 'DEBUG'  # (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 main_log_name: main.log
-coarse_log_name: coarse.log
-fine_log_name: fine.log'
-occupany_log_name: occupancy.log
 
 ## save path ##
 result_path: '/home/spacex/melodic_workspace/DORF/results/'

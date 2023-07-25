@@ -22,8 +22,8 @@ from config_loader import Config
 
 from my_logger import MyLogger
 from coarse_filter import save_dynamic_map, save_static_map, save_bin_color_map, coarse_main
-from fined_filter import ground_segmentation, scan_ratio_test, fined_main
-from occupancy_checking import occupancy_checking, occupancy_checking_mp
+from fine_filter import fine_main
+from occupancy_checking import occupancy_checking_mp
 
 
 def log_args():
@@ -52,29 +52,16 @@ if __name__ == '__main__':
     rospy.init_node('dorf_node')
     # scan_pub = rospy.Publisher('local_map', PointCloud2, queue_size=10)
     
-    
     config = Config()
     config.load(args.config_path)
     
     # Set random seed
     np.random.seed(args.seed)
     random.seed(args.seed)
-        
-    
-    if args.dataset == 'kitti': 
-        PCD_FILE_PATH = config.pcd_path['seq_' + args.seq]
-        BAG_FILE_PATH = config.bag_path['seq_' + args.seq]
-        SEQ_REUSLT_PATH = config.result_path + args.seq + '/'
-        
-        print('PCD_FILE_PATH = {}'.format(PCD_FILE_PATH))
-        print('BAG_FILE_PATH = {}'.format(BAG_FILE_PATH))
-        print('SEQ_REUSLT_PATH = {}'.format(SEQ_REUSLT_PATH))
-    elif args.dataset == 'gazebo':
-        PCD_FILE_PATH = config.gazebo_pcd_path['seq_'+ args.seq]
-        BAG_FILE_PATH = config.gazebo_bag_path['seq_'+ args.seq]
-        SEQ_REUSLT_PATH = config.gazebo_result_path + args.seq + '/'
-    else:
-        raise NotImplementedError
+
+    PCD_FILE_PATH = config.pcd_path['seq_' + args.seq]
+    BAG_FILE_PATH = config.bag_path['seq_' + args.seq]
+    SEQ_REUSLT_PATH = config.result_path + args.seq + '/'
 
     if not os.path.exists(SEQ_REUSLT_PATH):
         os.makedirs(SEQ_REUSLT_PATH)
@@ -120,7 +107,7 @@ if __name__ == '__main__':
     pcd_3d_kdtree = KDTree(pcd_3d_points)
     
     if args.coarse_pkl == 'save':
-        coarse_dynamic_map_pt_ids, coarse_dynamic_freq_dict = coarse_main(pcd_raw_points, pcd_kdtree, pcd_3d_kdtree, node_msg_list, RESULT_SAVING_PATH, args)
+        coarse_dynamic_map_pt_ids, coarse_dynamic_freq_dict = coarse_main(pcd_raw_points, pcd_kdtree, pcd_3d_kdtree, node_msg_list, RESULT_SAVING_PATH, args, config)
         logger.INFO('After coarse removal, there are {} dynamic points'.format(len(set(coarse_dynamic_map_pt_ids))))
 
         # Store coarse_dynamic_map_pt_ids, coarse_dynamic_freq_dict
@@ -136,20 +123,13 @@ if __name__ == '__main__':
             coarse_dynamic_freq_dict = pickle.load(fp)
     
     if args.ground_pkl == 'save':
-        ground_point_raw_ids, ground_freq_dict, fined_static_point_raw_ids, fined_dynamic_point_raw_ids = fined_main(pcd_raw_points, pcd_kdtree, node_msg_list, RESULT_SAVING_PATH, args)
+        ground_point_raw_ids, ground_freq_dict, fined_static_point_raw_ids, fined_dynamic_point_raw_ids = fine_main(pcd_raw_points, pcd_kdtree, node_msg_list, RESULT_SAVING_PATH, args, config)
         logger.INFO('After ground segmentation, we get {} ground points'.format(len(ground_point_raw_ids)))
-        
-        # raise NotImplementedError    
+          
         raw_ground_intersection = set(coarse_dynamic_map_pt_ids) & set(ground_point_raw_ids)
         ground_intersection = set([pt_id for pt_id in raw_ground_intersection if coarse_dynamic_freq_dict[pt_id] < ground_freq_dict[pt_id]])
         
         # ground point reverting
-        
-        # if args.dataset == 'kitti':
-        #     after_seg_dynamic_point_raw_ids = list(set(coarse_dynamic_map_pt_ids) - ground_intersection)
-        # elif args.dataset == 'gazebo':
-        #     after_seg_dynamic_point_raw_ids = list(set(coarse_dynamic_map_pt_ids) - raw_ground_intersection)
-        
         after_seg_dynamic_point_raw_ids = list(set(coarse_dynamic_map_pt_ids) - ground_intersection)
         after_seg_static_point_raw_ids = list(set(range(len(pcd_raw_points))) - set(after_seg_dynamic_point_raw_ids))
         
@@ -173,7 +153,7 @@ if __name__ == '__main__':
             after_seg_static_point_raw_ids = pickle.load(fp)
     
     # 2D Occupancy Checking
-    pure_static_raw_ids = occupancy_checking_mp(pcd_3d_points, node_msg_list, args)
+    pure_static_raw_ids = occupancy_checking_mp(pcd_3d_points, node_msg_list, args, config)
     after_occ_checking_dynamic_raw_ids = list(set(after_seg_dynamic_point_raw_ids) - set(pure_static_raw_ids))
     after_occ_checking_static_raw_ids = list(set(range(len(pcd_raw_points))) - set(after_occ_checking_dynamic_raw_ids))
     
