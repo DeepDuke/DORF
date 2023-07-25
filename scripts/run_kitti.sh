@@ -19,7 +19,7 @@ pcd_paths=(
 for ((i=0; i< 5; i++))  
 do  
 # run REMO
-python /home/spacex/melodic_workspace/DORF/main.py --dataset=kitti --seq=${dir_set[$i]} --config_path /home/spacex/melodic_workspace/DORF/config/kitti.yaml --n_proc=1
+python /home/spacex/melodic_workspace/DORF/main.py --dataset=kitti --seq=${dir_set[$i]} --config_path /home/spacex/melodic_workspace/DORF/config/kitti.yaml --n_proc=10
 
 # kill process
 sudo pkill -9 python
@@ -31,5 +31,5 @@ cd ${result_path};
 for ((i=0; i< 5; i++))  
 do  
 static_map_path="seq_${dir_set[$i]}_final_static_map.pcd";
-python /home/spacex/melodic_workspace/DORF/src/tools/analysis.py --gt ${pcd_paths[$i]} --est "./${dir_set[$i]}/$static_map_path"
+python /home/spacex/melodic_workspace/DORF/tools/analysis.py --gt ${pcd_paths[$i]} --est "./${dir_set[$i]}/$static_map_path"
 done
