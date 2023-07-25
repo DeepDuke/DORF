@@ -109,7 +109,7 @@ def single_scan_ray_tracing(node_msg, occupancy_grid_map):
     
     return ray_tracing_result 
 
-def occupancy_checking_mp(pcd_3d_points, node_msg_list, args, config):
+def occupancy_filter(pcd_3d_points, node_msg_list, args, config):
     occupancy_grid_map = OccupancyGridMap2D(pcd_3d_points, config.ray_tracing_resolution, args)
     result = mp.Pool(args.n_proc).map(partial(single_scan_ray_tracing, occupancy_grid_map=occupancy_grid_map), node_msg_list)
     

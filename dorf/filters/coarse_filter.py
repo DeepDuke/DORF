@@ -21,7 +21,7 @@ from dorf.utils.range_image_utils import sliding_window_get_single_scan_ri, slid
 from dorf.utils.range_image_utils import sliding_window_incremental_get_local_map_ri, sliding_window_incremental_get_local_map_info
 
 
-def coarse_main(pcd_raw_points, pcd_kdtree, pcd_3d_kdtree, node_msg_list, RESULT_SAVING_PATH, args, config):
+def coarse_filter(pcd_raw_points, pcd_kdtree, pcd_3d_kdtree, node_msg_list, RESULT_SAVING_PATH, args, config):
     # Set random seed
     np.random.seed(args.seed)
     random.seed(args.seed)

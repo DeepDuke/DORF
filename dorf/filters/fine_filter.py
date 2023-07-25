@@ -49,7 +49,7 @@ def save_ground_static_map(ground_point_raw_ids, pcd_raw_points, save_path):
     obj = pypcd.PointCloud.from_msg(pc2_msg)
     obj.save(save_path)
 
-def fine_main(pcd_raw_points, pcd_kdtree, node_msg_list,RESULT_SAVING_PATH, args, config):
+def fine_filter(pcd_raw_points, pcd_kdtree, node_msg_list,RESULT_SAVING_PATH, args, config):
     
     ground_point_raw_ids, freq_dict, total_static_point_raw_ids, total_dynamic_point_raw_ids = ground_segmentation_mp(pcd_raw_points, pcd_kdtree, node_msg_list, args, config)
     

@@ -16,9 +16,9 @@ from dorf.utils.rosbag_reader import RosbagReader
 from dorf.utils.config_loader import Config
 
 from dorf.utils.my_logger import MyLogger
-from dorf.filters.coarse_filter import save_dynamic_map, save_static_map, save_bin_color_map, coarse_main
-from dorf.filters.fine_filter import fine_main
-from dorf.filters.occupancy_checking import occupancy_checking_mp
+from dorf.filters.coarse_filter import save_dynamic_map, save_static_map, save_bin_color_map, coarse_filter
+from dorf.filters.fine_filter import fine_filter
+from dorf.filters.occupancy_checking import occupancy_filter
 
 
 def log_args():
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     
     # Store some middle results just for debug
     if args.coarse_pkl == 'save':
-        coarse_dynamic_map_pt_ids, coarse_dynamic_freq_dict = coarse_main(pcd_raw_points, pcd_kdtree, pcd_3d_kdtree, node_msg_list, RESULT_SAVING_PATH, args, config)
+        coarse_dynamic_map_pt_ids, coarse_dynamic_freq_dict = coarse_filter(pcd_raw_points, pcd_kdtree, pcd_3d_kdtree, node_msg_list, RESULT_SAVING_PATH, args, config)
         logger.INFO('After coarse removal, there are {} dynamic points'.format(len(set(coarse_dynamic_map_pt_ids))))
 
         # Store coarse_dynamic_map_pt_ids, coarse_dynamic_freq_dict
@@ -117,7 +117,7 @@ if __name__ == '__main__':
             coarse_dynamic_freq_dict = pickle.load(fp)
     
     if args.ground_pkl == 'save':
-        ground_point_raw_ids, ground_freq_dict, fined_static_point_raw_ids, fined_dynamic_point_raw_ids = fine_main(pcd_raw_points, pcd_kdtree, node_msg_list, RESULT_SAVING_PATH, args, config)
+        ground_point_raw_ids, ground_freq_dict, fined_static_point_raw_ids, fined_dynamic_point_raw_ids = fine_filter(pcd_raw_points, pcd_kdtree, node_msg_list, RESULT_SAVING_PATH, args, config)
         logger.INFO('After ground segmentation, we get {} ground points'.format(len(ground_point_raw_ids)))
           
         raw_ground_intersection = set(coarse_dynamic_map_pt_ids) & set(ground_point_raw_ids)
@@ -147,7 +147,7 @@ if __name__ == '__main__':
             after_seg_static_point_raw_ids = pickle.load(fp)
     
     # 2D Occupancy Checking
-    pure_static_raw_ids = occupancy_checking_mp(pcd_3d_points, node_msg_list, args, config)
+    pure_static_raw_ids = occupancy_filter(pcd_3d_points, node_msg_list, args, config)
     after_occ_checking_dynamic_raw_ids = list(set(after_seg_dynamic_point_raw_ids) - set(pure_static_raw_ids))
     after_occ_checking_static_raw_ids = list(set(range(len(pcd_raw_points))) - set(after_occ_checking_dynamic_raw_ids))
     
