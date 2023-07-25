@@ -10,8 +10,8 @@ from tabulate import tabulate
 from sklearn.neighbors import KDTree
 
 import rospy
-from dorf.utils.kitti_pcd_reader import PCDReader
-from dorf.utils.kitti_rosbag_reader import RosbagReader
+from dorf.utils.pcd_reader import PCDReader
+from dorf.utils.rosbag_reader import RosbagReader
 
 from dorf.utils.config_loader import Config
 
