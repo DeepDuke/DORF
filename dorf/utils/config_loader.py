@@ -28,8 +28,16 @@ class Config:
         self.neighbor_radius = 0.2
         
         ## Fine parameters ##
+        self.ransac_height_threshold = 0.2        # Unit: meters
+        self.z_threshold_alpha = 0.9
+        self.distance_alpha = 2.0
+        self.z_threshold_beta = 0.2
+        self.distance_beta = 0.5
+        
         self.n_ring = 60
         self.n_seg = 10
+        
+        ## Occupancy checking parameters ##
         self.ray_tracing_resolution = 1.0
         self.pure_static_threshold = 0.0165
         

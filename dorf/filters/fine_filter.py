@@ -237,22 +237,14 @@ def ransac_bin_ground_segmentaion(bin, SOI_pts, args, config, distance_threshold
     max_z = np.max(bin_points[:, 2])
     min_z = np.min(bin_points[:, 2])
     elevation_height = max_z - min_z
-     
+    
     # Estimate the z-threshold
-    if args.dataset == 'kitti':    
-        if elevation_height < 0.2:
-            z_threshold = 0.9*elevation_height + min_z #0.5*mean_z
-            distance_threshold *= 2
-        else:
-            z_threshold = 0.2*elevation_height + min_z
-            distance_threshold *= 0.5
-    elif args.dataset == 'gazebo':
-        if elevation_height < 0.2:
-            z_threshold = 0.9*elevation_height + min_z #0.5*mean_z
-            distance_threshold *= 2
-        else:
-            z_threshold = 0.05*elevation_height + min_z
-            distance_threshold *= 0.5
+    if elevation_height < config.ransac_height_threshold:
+        z_threshold = config.z_threshold_alpha * elevation_height + min_z #0.5*mean_z
+        distance_threshold *= config.distance_alpha
+    else:
+        z_threshold = config.z_threshold_beta * elevation_height + min_z
+        distance_threshold *= config.distance_beta
                                                 
     lower_bin_point_ids = [id for id in bin.point_ids if SOI_pts[id][2] <= z_threshold]
     lower_bin_points = np.array([SOI_pts[id] for id in lower_bin_point_ids]) 

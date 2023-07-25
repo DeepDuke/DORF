@@ -20,8 +20,17 @@ revert_dist_threshold: 0.001
 neighbor_radius: 0.2
 
 ## Fine parameters ##
+# ground segmentation parameters
+ransac_height_threshold: 0.2        # Unit: meters
+z_threshold_alpha: 0.9
+distance_alpha: 2.0
+z_threshold_beta: 0.2
+distance_beta: 0.5
+
 n_ring: 60
 n_seg: 10
+
+## Occupancy checking filter parameters ##
 ray_tracing_resolution: 1.0
 pure_static_threshold: 0.0165
 
