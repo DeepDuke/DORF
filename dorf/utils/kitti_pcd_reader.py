@@ -1,8 +1,7 @@
-#! /usr/bin/python2
+#! /usr/bin/python2.7
 
 from __future__ import print_function
 import numpy as np 
-import pyrosbag 
 from pypcd import pypcd
 
 import rospy 
@@ -10,7 +9,7 @@ from std_msgs.msg import Header
 from sensor_msgs import point_cloud2
 from sensor_msgs.msg import PointCloud2, PointField
 
-from src.utils.color_utils import MOVING_OBJECT_LABELS, LABEL_TO_NAME, get_label_color
+from dorf.utils.color_utils import MOVING_OBJECT_LABELS, LABEL_TO_NAME, get_label_color
 
 
 class PCDReader:

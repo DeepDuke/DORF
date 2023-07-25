@@ -10,20 +10,15 @@ from tabulate import tabulate
 from sklearn.neighbors import KDTree
 
 import rospy
-from sensor_msgs import point_cloud2
-from sensor_msgs.msg import PointCloud2, PointField
-from std_msgs.msg import Header
+from dorf.utils.kitti_pcd_reader import PCDReader
+from dorf.utils.kitti_rosbag_reader import RosbagReader
 
-from pypcd import pypcd
-from src.utils.kitti_pcd_reader import PCDReader
-from src.utils.kitti_rosbag_reader import RosbagReader
+from dorf.utils.config_loader import Config
 
-from src.utils.config_loader import Config
-
-from src.utils.my_logger import MyLogger
-from src.filters.coarse_filter import save_dynamic_map, save_static_map, save_bin_color_map, coarse_main
-from src.filters.fine_filter import fine_main
-from src.filters.occupancy_checking import occupancy_checking_mp
+from dorf.utils.my_logger import MyLogger
+from dorf.filters.coarse_filter import save_dynamic_map, save_static_map, save_bin_color_map, coarse_main
+from dorf.filters.fine_filter import fine_main
+from dorf.filters.occupancy_checking import occupancy_checking_mp
 
 
 def log_args():

@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#! /usr/bin/python2.7
 import struct
 import numpy as np 
 

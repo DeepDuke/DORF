@@ -7,7 +7,6 @@ from sensor_msgs import point_cloud2
 
 import numpy as np
 from math import sqrt, atan2, asin, pi
-from matplotlib import pyplot as plt
 from copy import deepcopy
 
 
@@ -434,7 +433,7 @@ def sliding_window_get_single_scan_ri(msg_idx, cur_node, query_id, query_node, a
     cur_odom_pose = cur_node.odom
     transfomed_points = transform_from_one_lidar_frame_to_another_lidar_frame(query_odom_pose, cur_odom_pose, points, args)
 
-    print('{}-frame, query-di --> {}, Generate scan range image ...'.format(msg_idx, query_id))
+    print('{}-frame, query-id --> {}, Generate scan range image ...'.format(msg_idx, query_id))
     
     scan_ri, scan_index_ri = gen_scan_range_image(transfomed_points, args, config)
     

@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/python2.7
 
 from __future__ import print_function
 import numpy as np 
@@ -6,16 +6,13 @@ import rosbag
 # import bagpy
 
 import rospy 
-# from remo.msg import node
-from std_msgs.msg import Header
-from sensor_msgs import point_cloud2
-from sensor_msgs.msg import PointCloud2, PointField
+from sensor_msgs.msg import PointCloud2
 from geometry_msgs.msg import TransformStamped
 import tf
 from tf.transformations import quaternion_from_matrix
 from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 
-from src.utils.color_utils import MOVING_OBJECT_LABELS, LABEL_TO_NAME, get_label_color
+from dorf.utils.color_utils import MOVING_OBJECT_LABELS, LABEL_TO_NAME, get_label_color
 
 
 class RosbagReader:
