@@ -1,0 +1,8 @@
+*.bag
+*.pcd
+*.log
+*.pyc
+**/.vscode/**
+*.pkl
+*.whl
+*.tar.xz

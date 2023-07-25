@@ -1,0 +1,53 @@
+## coarse parameters ##
+image_w_reso: 1.5                   # Unit: degree
+image_h_reso: 1.5                   # Unit: degree
+local_map_radius: 5.0               # Unit: meters
+local_map_max_height: 5.0           # Unit: meters
+local_map_min_height: -3.0          # Unit: meters
+dyn_threshold: 1.0                  # Unit: meters
+# LiDAR FOV 
+horizontal_fov: 360.0               # Unit: degree 
+theta_up: 22.5                      # Unit: degree
+theta_down: -22.5                   # Unit: degree
+# receding horizon parameters
+max_window_size: 40
+sliding_window_size: 3 
+ratio: 1.5
+beginning_ratio: 0.001
+end_ratio: 0.001
+# coarse reverting parameters
+revert_dist_threshold: 0.001
+neighbor_radius: 0.2
+
+## Fine parameters ##
+# ground segmentation parameters
+ransac_height_threshold: 0.2        # Unit: meters
+z_threshold_alpha: 0.9
+distance_alpha: 2.0
+z_threshold_beta: 0.05
+distance_beta: 0.5
+
+n_ring: 5
+n_seg: 4
+
+## Occupancy checking filter parameters ##
+ray_tracing_resolution: 1.0
+pure_static_threshold: 0.015
+
+## log path ##
+log_path: ./log/
+log_level: 'DEBUG'  # (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+main_log_name: main.log
+
+## save path ##
+result_path: '/home/spacex/melodic_workspace/DORF/results/'
+
+## dataset path ##
+bag_path:
+  seq_ped50: '/home/spacex/melodic_workspace/DORF/dataset/gazebo/bag/node_ped_50_voxel_0.2.bag'
+  seq_ped100: '/home/spacex/melodic_workspace/DORF/dataset/gazebo/bag/node_ped_100_voxel_0.2.bag'
+  seq_ped150: '/home/spacex/melodic_workspace/DORF/dataset/gazebo/bag/node_ped_150_voxel_0.2.bag'
+pcd_path:
+  seq_ped50: '/home/spacex/melodic_workspace/DORF/dataset/gazebo/pcd/ped_50_raw_voxel_0.2.pcd'
+  seq_ped100: '/home/spacex/melodic_workspace/DORF/dataset/gazebo/pcd/ped_100_raw_voxel_0.2.pcd'
+  seq_ped150: '/home/spacex/melodic_workspace/DORF/dataset/gazebo/pcd/ped_150_raw_voxel_0.2.pcd'

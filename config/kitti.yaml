@@ -1,0 +1,57 @@
+## coarse parameters ##
+image_w_reso: 1.0                   # Unit: degree
+image_h_reso: 1.0                   # Unit: degree
+local_map_radius: 60.0              # Unit: meters
+local_map_max_height: 5.0           # Unit: meters
+local_map_min_height: -3.0          # Unit: meters
+dyn_threshold: 1.0                  # Unit: meters
+# LiDAR FOV 
+horizontal_fov: 360.0               # Unit: degree 
+theta_up: 2.0                       # Unit: degree
+theta_down: -25.0                   # Unit: degree
+# receding horizon parameters
+max_window_size: 40
+sliding_window_size: 10 
+ratio: 1.5
+beginning_ratio: 0.25 
+end_ratio: 0.25
+# coarse reverting parameters
+revert_dist_threshold: 0.001
+neighbor_radius: 0.2
+
+## Fine parameters ##
+# ground segmentation parameters
+ransac_height_threshold: 0.2        # Unit: meters
+z_threshold_alpha: 0.9
+distance_alpha: 2.0
+z_threshold_beta: 0.2
+distance_beta: 0.5
+
+n_ring: 60
+n_seg: 10
+
+## Occupancy checking filter parameters ##
+ray_tracing_resolution: 1.0
+pure_static_threshold: 0.0165
+
+## log path ##
+log_path: ./log/
+log_level: 'DEBUG'  # (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+main_log_name: main.log
+
+## save path ##
+result_path: '/home/spacex/melodic_workspace/DORF/results/'
+
+## dataset path ##
+bag_path:
+  seq_00: '/home/spacex/melodic_workspace/DORF/dataset/kitti/bag/00_4390_to_4530_w_interval_2_node.bag'
+  seq_01: '/home/spacex/melodic_workspace/DORF/dataset/kitti/bag/01_150_to_250_w_interval_1_node.bag'
+  seq_02: '/home/spacex/melodic_workspace/DORF/dataset/kitti/bag/02_860_to_950_w_interval_2_node.bag'
+  seq_05: '/home/spacex/melodic_workspace/DORF/dataset/kitti/bag/05_2350_to_2670_w_interval_2_node.bag'
+  seq_07: '/home/spacex/melodic_workspace/DORF/dataset/kitti/bag/07_630_to_820_w_interval_2_node.bag'
+pcd_path:
+  seq_00: '/home/spacex/melodic_workspace/DORF/dataset/kitti/pcd/00_4390_to_4530_w_interval2_voxel_0.200000.pcd'
+  seq_01: '/home/spacex/melodic_workspace/DORF/dataset/kitti/pcd/01_150_to_250_w_interval1_voxel_0.200000.pcd'
+  seq_02: '/home/spacex/melodic_workspace/DORF/dataset/kitti/pcd/02_860_to_950_w_interval2_voxel_0.200000.pcd'
+  seq_05: '/home/spacex/melodic_workspace/DORF/dataset/kitti/pcd/05_2350_to_2670_w_interval2_voxel_0.200000.pcd'
+  seq_07: '/home/spacex/melodic_workspace/DORF/dataset/kitti/pcd/07_630_to_820_w_interval2_voxel_0.200000.pcd'
