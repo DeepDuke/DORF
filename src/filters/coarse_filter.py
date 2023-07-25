@@ -18,9 +18,9 @@ from pypcd import pypcd
 import multiprocessing as mp
 from functools import partial
 
-from color_utils import get_label_color
-from range_image_utils import sliding_window_get_single_scan_ri, sliding_window_get_residual_ri
-from range_image_utils import sliding_window_incremental_get_local_map_ri, sliding_window_incremental_get_local_map_info
+from src.utils.color_utils import get_label_color
+from src.utils.range_image_utils import sliding_window_get_single_scan_ri, sliding_window_get_residual_ri
+from src.utils.range_image_utils import sliding_window_incremental_get_local_map_ri, sliding_window_incremental_get_local_map_info
 
 
 def coarse_main(pcd_raw_points, pcd_kdtree, pcd_3d_kdtree, node_msg_list, RESULT_SAVING_PATH, args, config):

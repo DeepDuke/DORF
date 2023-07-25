@@ -8,7 +8,7 @@ from functools import partial
 import multiprocessing as mp
 
 from sensor_msgs import point_cloud2
-from range_image_utils import transform_from_lidar_frame_to_map_frame
+from src.utils.range_image_utils import transform_from_lidar_frame_to_map_frame
 
 
 class Grid:

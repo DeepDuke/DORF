@@ -10,7 +10,7 @@ from std_msgs.msg import Header
 from sensor_msgs import point_cloud2
 from sensor_msgs.msg import PointCloud2, PointField
 
-from color_utils import MOVING_OBJECT_LABELS, LABEL_TO_NAME, get_label_color
+from src.utils.color_utils import MOVING_OBJECT_LABELS, LABEL_TO_NAME, get_label_color
 
 
 class PCDReader:

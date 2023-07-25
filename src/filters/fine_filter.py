@@ -17,8 +17,8 @@ from std_msgs.msg import Header
 
 from pypcd import pypcd 
 
-from range_image_utils import transform_local_map_to_lidar_frame, transform_local_map_to_lidar_frame_gazebo
-from color_utils import get_ground_object_color, get_static_object_color
+from src.utils.range_image_utils import transform_local_map_to_lidar_frame, transform_local_map_to_lidar_frame_gazebo
+from src.utils.color_utils import get_ground_object_color, get_static_object_color
 
 
 class Bin:

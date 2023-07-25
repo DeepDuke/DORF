@@ -15,7 +15,7 @@ import tf
 from tf.transformations import quaternion_from_matrix
 from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 
-from color_utils import MOVING_OBJECT_LABELS, LABEL_TO_NAME, get_label_color
+from src.utils.color_utils import MOVING_OBJECT_LABELS, LABEL_TO_NAME, get_label_color
 
 
 class RosbagReader:

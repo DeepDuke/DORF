@@ -15,15 +15,15 @@ from sensor_msgs.msg import PointCloud2, PointField
 from std_msgs.msg import Header
 
 from pypcd import pypcd
-from kitti_pcd_reader import PCDReader
-from kitti_rosbag_reader import RosbagReader
+from src.utils.kitti_pcd_reader import PCDReader
+from src.utils.kitti_rosbag_reader import RosbagReader
 
-from config_loader import Config
+from src.utils.config_loader import Config
 
-from my_logger import MyLogger
-from coarse_filter import save_dynamic_map, save_static_map, save_bin_color_map, coarse_main
-from fine_filter import fine_main
-from occupancy_checking import occupancy_checking_mp
+from src.utils.my_logger import MyLogger
+from src.filters.coarse_filter import save_dynamic_map, save_static_map, save_bin_color_map, coarse_main
+from src.filters.fine_filter import fine_main
+from src.filters.occupancy_checking import occupancy_checking_mp
 
 
 def log_args():
@@ -37,10 +37,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='filtering for dynamic points.')
     parser.add_argument('--dataset', type=str, default='kitti', help="dataset type: ['kitti', 'gazebo', 'ust']")
     parser.add_argument('--seq', type=str, default='00', help="Semantic sequence id, ['00', '01', '02', '05', '07', \
-                        'ped_sample', 'ped_50', 'ped_100', 'ped_150', \
-                            'ust_ped_1', 'ust_ped_2', 'ust_ped_3', 'ust_ped_4', \
-                                'ust_scene_2', 'ust_scene_3', 'ust_scene_4]")
-    parser.add_argument('--n_proc', type=int, default=20, help='num of processes')
+                        gazebo sequence id: ['ped_50', 'ped_100', 'ped_150']")
+    parser.add_argument('--n_proc', type=int, default=18, help='num of processes')
     parser.add_argument('--seed', type=int, default=0, help='value of random seed')
     parser.add_argument('--coarse_pkl', type=str, default='save', help="save or load  *.pkl for coarse stage ['save', 'load']")
     parser.add_argument('--ground_pkl', type=str, default='save', help="save or load  *.pkl for ground segmentation stage ['save', 'load']")
@@ -106,6 +104,7 @@ if __name__ == '__main__':
     pcd_3d_points = np.array([[point[0], point[1], point[2]] for point in pcd_raw_points])
     pcd_3d_kdtree = KDTree(pcd_3d_points)
     
+    # Store some middle results just for debug
     if args.coarse_pkl == 'save':
         coarse_dynamic_map_pt_ids, coarse_dynamic_freq_dict = coarse_main(pcd_raw_points, pcd_kdtree, pcd_3d_kdtree, node_msg_list, RESULT_SAVING_PATH, args, config)
         logger.INFO('After coarse removal, there are {} dynamic points'.format(len(set(coarse_dynamic_map_pt_ids))))

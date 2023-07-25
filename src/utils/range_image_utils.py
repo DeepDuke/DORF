@@ -2,8 +2,6 @@
 
 from color_utils import MOVING_OBJECT_LABELS, COLOR_ZOO
 
-from config import remo_params
-
 from tf.transformations import quaternion_matrix, translation_matrix, inverse_matrix
 from sensor_msgs import point_cloud2
 
@@ -155,7 +153,7 @@ def gen_visible_residual_range_image(scan_ri, local_map_ri, local_map_index_ri, 
                 # found invalid dynamic point
                 res_vis_img[row_id, col_id] = COLOR_ZOO['deep_green']
                 return 0
-            elif diff > remo_params['DYN_THRESHOLD']:
+            elif diff > config.dyn_threshold:
                 # possible dynamic point
                 dyn_pt_indices.append(local_map_index_ri[row_id, col_id])
                 res_vis_img[row_id, col_id, :] = COLOR_ZOO['red']
