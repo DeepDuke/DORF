@@ -30,7 +30,7 @@ pip install bresenham
 pip install tabulate
 ```
 
-We have already wrapped the DORF into a python wheel for simplely installing dependencices, the wheel file `dorf-0.0.1-py2-none-any.whl` is in the `Releases Section` in this repo. Please download this wheel file and run:
+We have already wrapped the DORF into a python wheel for simplely installing dependencices, the wheel file `dorf-0.0.1-py2-none-any.whl` is in the `Releases Section` in this repo. Please download this wheel file [dorf-0.0.1-py2-none-any.whl](https://github.com/DeepDuke/DORF/releases/tag/v0.0.1) and run:
 ```bash
 pip install dorf-0.0.1-py2-none-any.whl
 ```
@@ -96,7 +96,8 @@ The results should be in `DORF/results` folder.
 
 ## Calculate the metrics
 ```bash
-python dorf/tools/analysis.py --gt /path/to/gt_truth.pcd  --est /path/to/estimated_static_map.pcd 
+# In the DORF source folder
+python ./tools/analysis.py --gt /path/to/gt_truth.pcd  --est /path/to/estimated_static_map.pcd 
 ```
 You then get something like:
 ![](./doc/evaluation.png)
