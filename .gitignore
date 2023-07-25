@@ -5,3 +5,4 @@
 **/.vscode/**
 *.pkl
 *.whl
+*.tar.xz

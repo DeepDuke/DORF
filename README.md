@@ -39,8 +39,9 @@ then clone this repo:
 git clone git@github.com:DeepDuke/DORF.git
 ```
 ## Prepared Dataset
+Please download the dataset at [dataset.tar.xz](https://drive.google.com/file/d/1icWZ2iCqT6aMzym-_f_Mc-dekMN-G-yJ/view?usp=sharing),  including:
 - preprocessed kitti dataset (from [ERASOR](https://github.com/LimHyungTae/ERASOR))
-- preprocessed gazebo crowd dataset (also cpnverted into same format with [ERASOR](https://github.com/LimHyungTae/ERASOR))
+- preprocessed gazebo crowd dataset (also converted into same format with [ERASOR](https://github.com/LimHyungTae/ERASOR))
 
 
 ## Run
@@ -97,7 +98,8 @@ The results should be in `DORF/results` folder.
 ```bash
 python dorf/tools/analysis.py --gt /path/to/gt_truth.pcd  --est /path/to/estimated_static_map.pcd 
 ```
-
+You then get something like:
+![](./doc/evaluation.png)
 Don't worry, we have also already provide the ground truth and result pcd files. Then you directly reproduce the metrics in this work. Please download them at [dorf_pcd_files](https://drive.google.com/file/d/1wdjOwMGXblpk9CUYGP2mIqrrWqtSCc9I/view?usp=sharing).
 
 
