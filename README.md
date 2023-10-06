@@ -1,5 +1,8 @@
 # DORF
 
+## Attention
+The releated field is so fast changing. Recently there is a new SOTA method [ERASOR2](https://github.com/url-kaist/ERASOR2) achieve better result on SemanticKITTI. We may add some comparison result later.
+
 ## Environment
 - Ubuntu 18.04 LTS
 - ROS Melodic
